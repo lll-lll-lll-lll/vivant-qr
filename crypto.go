@@ -98,8 +98,6 @@ func pkcs7Unpad(data []byte) []byte {
 	return data[:dataLength-padLength]
 }
 
-// decrypted, _ := decrypt(encrypted, key, iv)
-// fmt.Printf("Decrypted: %s\n", decrypted)
 func decrypt(data []byte, key []byte, iv []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {

@@ -64,22 +64,17 @@ func main() {
 				}
 				content := string(f)
 				splittedCttSlice := strings.Split(content, " ")
-				fmt.Println("splittedCttSlice", splittedCttSlice)
-				fmt.Println("order", order)
 				var correctNums = make([]string, 0, 11)
 				for _, o := range order {
 					idx, _ := strconv.Atoi(string(o))
 					correctNums = append(correctNums, splittedCttSlice[idx])
 				}
-				fmt.Println("correctNums", correctNums)
-
 				iv := correctNums[len(correctNums)-1] + correctNums[len(correctNums)-2]
 				ivByte, err := base64.StdEncoding.DecodeString(iv)
 				if err != nil {
 					log.Fatal(err)
 				}
 				notDummyEncrypted := strings.Join(correctNums[:8], "")
-				fmt.Println("iv", iv)
 				nde, err := base64.StdEncoding.DecodeString(notDummyEncrypted)
 				if err != nil {
 					log.Fatal(err)
@@ -129,7 +124,6 @@ func main() {
 			return nil
 		},
 	}
-
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
