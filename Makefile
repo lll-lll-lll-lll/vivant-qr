@@ -4,3 +4,5 @@ read:
 	./cli --read true --file ./writed.txt 
 write:
 	./cli --write true
+fresh:
+	./cli --refresh true

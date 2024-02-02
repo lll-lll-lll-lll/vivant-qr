@@ -23,28 +23,10 @@ func write(s []string) {
 	}
 }
 
-func separate(iv string, encryptedTxt string, dummy string, order int) []string {
-	ivSepa := []string{iv[len(iv)/2:], iv[:len(iv)/2]}
-	var orderStr string = strconv.Itoa(order)
-	num := len(encryptedTxt) / 8
-	var s = make([]string, 10)
-	for i, v := range orderStr[:len(orderStr)-2] {
-		idx, _ := strconv.Atoi(string(v))
-		startIndex := i * num
-		endIndex := (i + 1) * num
-		s[idx] = encryptedTxt[startIndex:endIndex]
-	}
-	for i, v := range orderStr[len(orderStr)-2:] {
-		idx, _ := strconv.Atoi(string(v))
-		s[idx] = ivSepa[i]
-	}
-
-	return s
-}
-
-func genOrder(num int) int {
+func genOrder(num int64) int {
+	rand.New(rand.NewSource(num))
 	var res string
-	for _, v := range rand.Perm(num) {
+	for _, v := range rand.Perm(int(num)) {
 		res += strconv.Itoa(v)
 	}
 	a, _ := strconv.Atoi(res)
@@ -54,7 +36,19 @@ func genOrder(num int) int {
 func genDummy(num int64) string {
 	rand.New(rand.NewSource(num))
 
-	charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=^|"
+	charset := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	result := make([]byte, num)
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(result)
+}
+func genSecret(num int64) string {
+	rand.New(rand.NewSource(num))
+
+	charset := "0123456789"
 
 	result := make([]byte, num)
 	for i := range result {

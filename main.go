@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/joho/godotenv"
 	"github.com/urfave/cli/v2"
 )
 
@@ -39,18 +38,11 @@ func main() {
 		},
 		Action: func(cCtx *cli.Context) error {
 			if cCtx.Bool("read") {
-				if err := godotenv.Load(); err != nil {
-					log.Fatal("Error loading .env file")
+				cfg, err := NewCfg()
+				if err != nil {
+					log.Fatal(err)
 				}
-				order := os.Getenv("ORDER")
-				if order == "" {
-					log.Fatal("order is nil. refresh order")
-				}
-				k := os.Getenv("SECRET_KEY")
-				if k == "" {
-					log.Fatal("secret key is nil")
-				}
-				key, err := hex.DecodeString(k)
+				key, err := hex.DecodeString(cfg.SecretKey)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -65,7 +57,7 @@ func main() {
 				content := string(f)
 				splittedCttSlice := strings.Split(content, " ")
 				var correctNums = make([]string, 0, 11)
-				for _, o := range order {
+				for _, o := range strconv.Itoa(cfg.Order) {
 					idx, _ := strconv.Atoi(string(o))
 					correctNums = append(correctNums, splittedCttSlice[idx])
 				}
@@ -83,41 +75,24 @@ func main() {
 				fmt.Printf("Decrypted: %s\n", decrypted)
 			}
 			if cCtx.Bool("write") {
-				if err := godotenv.Load(); err != nil {
-					log.Fatal("Error loading .env file")
-				}
-				order := os.Getenv("ORDER")
-				if order == "" {
-					log.Fatal("order is nil. refresh order")
-				}
-				k := os.Getenv("SECRET_KEY")
-				if k == "" {
-					log.Fatal("secret key is nil")
-				}
-				key, _ := hex.DecodeString(k)
-				iv, encrypted, _ := Encrypt([]byte(vivant), key)
-				encodedIV := base64.StdEncoding.EncodeToString(iv)
-				fmt.Println("encdoeIV", encodedIV)
-				encodedEncrypted := base64.StdEncoding.EncodeToString(encrypted)
-				fmt.Println("encode", encodedEncrypted)
-				dummy := genDummy(12)
-				o, err := strconv.Atoi(order)
+				cfg, err := NewCfg()
 				if err != nil {
 					log.Fatal(err)
 				}
-				result := separate(encodedIV, encodedEncrypted, dummy, o)
+				vivantQR := &VivantQR{cfg: cfg}
+				result, err := vivantQR.Generate()
+				if err != nil {
+					log.Fatal(err)
+				}
 				write(result)
 			}
 			if cCtx.Bool("refresh") {
-				if err := godotenv.Load(); err != nil {
-					log.Fatal("Error loading .env file")
-				}
 				f, err := os.Create(".env")
 				if err != nil {
 					log.Fatal(err)
 				}
 				defer f.Close()
-				if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d", genOrder(10)))); err != nil {
+				if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%s", genOrder(10), genSecret(32)))); err != nil {
 					log.Fatal(err)
 				}
 			}
