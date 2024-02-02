@@ -80,11 +80,18 @@ func main() {
 					log.Fatal(err)
 				}
 				vivantQR := &VivantQR{cfg: cfg}
-				result, err := vivantQR.Generate()
+				result, err := vivantQR.Encrpto()
 				if err != nil {
 					log.Fatal(err)
 				}
-				write(result)
+				var res []string
+				for i := 2; i <= 12; i += 2 {
+					a := strings.Join(result[i-2:i], " ")
+					res = append(res, a)
+				}
+				if err := vivantQR.Output("./images/background.png", "./save.png", res); err != nil {
+					log.Fatal(err)
+				}
 			}
 			if cCtx.Bool("refresh") {
 				f, err := os.Create(".env")

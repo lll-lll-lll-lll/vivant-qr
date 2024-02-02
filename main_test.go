@@ -2,22 +2,16 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"strings"
 	"testing"
 )
 
-func Test_Write(t *testing.T) {
-	write([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"})
-}
-
 func Test(t *testing.T) {
-	sp := []string{"0afj3GzarA==", "iGltBiiuE", "7OzXrHfAV", "Ng87OKrWA", "VU2nIJ8u/", "wENZ3ue1l", "WwDfA1pnu2ry", "46iPFZwf3", "Sw/YPoH2Y", "+hQye+C3h"}
-	var correctNums = make([]string, 0, 11)
-	for _, o := range "3814957206" {
-		idx, _ := strconv.Atoi(string(o))
-		fmt.Println(sp[idx])
-		correctNums = append(correctNums, sp[idx])
+	b := []string{}
+	s := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}
+	for i := 2; i <= 12; i += 2 {
+		a := strings.Join(s[i-2:i], " ")
+		b = append(b, a)
 	}
-	fmt.Println("correctNums", correctNums)
-	fmt.Println("coorectiv", "WwDfA1pnu2ry0afj3GzarA==")
+	fmt.Println(len(b))
 }

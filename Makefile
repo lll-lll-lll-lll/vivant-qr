@@ -6,3 +6,6 @@ write:
 	./cli --write true
 fresh:
 	./cli --refresh true
+
+test:
+	go test . -v
