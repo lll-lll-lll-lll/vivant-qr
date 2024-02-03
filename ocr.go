@@ -15,6 +15,11 @@ type OCRClient struct {
 	lang string
 }
 
+func NewOCRClient() *OCRClient {
+	client := gosseract.NewClient()
+	return &OCRClient{c: client}
+}
+
 func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
 	if ocrC.lang == "" {
 		ocrC.lang = defaultLanguage
