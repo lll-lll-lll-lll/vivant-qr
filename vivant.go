@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"strings"
 
 	"image/png"
 	"os"
@@ -37,6 +38,32 @@ func (v *VivantQR) Encrpto() ([]string, error) {
 	return separate(encodedIV, encodedEncrypted, dummy, v.cfg.Order), nil
 }
 
+func (v *VivantQR) Decrypt(content []string) ([]byte, error) {
+	key, err := hex.DecodeString(v.cfg.SecretKey)
+	if err != nil {
+		return nil, err
+	}
+	var correctNums = make([]string, 0, 11)
+	for _, o := range strconv.Itoa(v.cfg.Order) {
+		idx, _ := strconv.Atoi(string(o))
+		correctNums = append(correctNums, content[idx])
+	}
+	iv := correctNums[len(correctNums)-1] + correctNums[len(correctNums)-2]
+	ivByte, err := base64.StdEncoding.DecodeString(iv)
+	if err != nil {
+		return nil, err
+	}
+	notDummyEncrypted := strings.Join(correctNums[:8], "")
+	nde, err := base64.StdEncoding.DecodeString(notDummyEncrypted)
+	if err != nil {
+		return nil, err
+	}
+	decrypted, err := decrypt(nde, key, ivByte)
+	if err != nil {
+		return nil, err
+	}
+	return decrypted, nil
+}
 func (v *VivantQR) Output(backGroundPath, savePath string, texts []string) error {
 	file, err := os.Open(backGroundPath)
 	if err != nil {
@@ -54,12 +81,12 @@ func (v *VivantQR) Output(backGroundPath, savePath string, texts []string) error
 	draw.Draw(m, m.Bounds(), img, bounds.Min, draw.Src)
 
 	textWidth := basicfont.Face7x13.Width
-	lines := 5
+	lines := 6
 	verticalSpacing := bounds.Dy() / (lines + 1)
 
-	for i := 1; i <= 5; i += 1 {
-		x := (bounds.Dx() - textWidth) / 8
-		y := i * verticalSpacing
+	for i := 0; i <= lines-1; i += 1 {
+		x := (bounds.Dx() - textWidth) / 22
+		y := (i + 1) * verticalSpacing
 		t := texts[i]
 		if err := drawTxt(m, x, y, t); err != nil {
 			return err
@@ -81,9 +108,9 @@ func drawTxt(img *image.RGBA, x, y int, text string) error {
 		return err
 	}
 	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size:    20,
+		Size:    10,
 		DPI:     100,
-		Hinting: font.HintingNone,
+		Hinting: font.Hinting(font.WeightThin),
 	})
 	if err != nil {
 		return err
@@ -116,6 +143,5 @@ func separate(iv string, encryptedTxt string, dummy string, order int) []string 
 	}
 	s[10] = dummy[len(dummy)/2:]
 	s[11] = dummy[:len(dummy)/2]
-
 	return s
 }

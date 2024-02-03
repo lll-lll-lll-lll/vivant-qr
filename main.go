@@ -1,12 +1,10 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/hex"
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/urfave/cli/v2"
@@ -42,37 +40,41 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				key, err := hex.DecodeString(cfg.SecretKey)
+				vivantQR := &VivantQR{cfg: cfg}
+				ocrClient := NewOCRClient()
+				defer ocrClient.c.Close()
+				content, err := ocrClient.Do(context.TODO(), "./save.png")
 				if err != nil {
 					log.Fatal(err)
 				}
-				path := cCtx.Args().Get(2)
-				if path == "" {
-					log.Fatal("file not set. --file {file path}")
+				splitedCnt := strings.Split(string(content), " ")
+				var decoded []string
+				for _, v := range splitedCnt {
+					v = strings.ReplaceAll(v, "\n", " ")
+					spliteV := strings.Split(v, " ")
+					if len(spliteV) == 2 {
+						for i := 0; i < len(spliteV); i++ {
+							s, err := octalStringToBytes(spliteV[i])
+							if err != nil {
+								log.Fatal(err)
+							}
+							fmt.Println("splite", spliteV[i])
+							fmt.Println("splite", string(s))
+							decoded = append(decoded, string(s))
+						}
+						continue
+					}
+					s, err := octalStringToBytes(v)
+					if err != nil {
+						log.Fatal(s, err)
+					}
+					decoded = append(decoded, string(s))
 				}
-				f, err := os.ReadFile(path)
+				r, err := vivantQR.Decrypt(decoded)
 				if err != nil {
 					log.Fatal(err)
 				}
-				content := string(f)
-				splittedCttSlice := strings.Split(content, " ")
-				var correctNums = make([]string, 0, 11)
-				for _, o := range strconv.Itoa(cfg.Order) {
-					idx, _ := strconv.Atoi(string(o))
-					correctNums = append(correctNums, splittedCttSlice[idx])
-				}
-				iv := correctNums[len(correctNums)-1] + correctNums[len(correctNums)-2]
-				ivByte, err := base64.StdEncoding.DecodeString(iv)
-				if err != nil {
-					log.Fatal(err)
-				}
-				notDummyEncrypted := strings.Join(correctNums[:8], "")
-				nde, err := base64.StdEncoding.DecodeString(notDummyEncrypted)
-				if err != nil {
-					log.Fatal(err)
-				}
-				decrypted, _ := decrypt(nde, key, ivByte)
-				fmt.Printf("Decrypted: %s\n", decrypted)
+				fmt.Printf(string(r))
 			}
 			if cCtx.Bool("write") {
 				cfg, err := NewCfg()
@@ -84,9 +86,23 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
+
+				var slic []string
+				for _, v := range result {
+					octal := bytesToOctalString([]byte(v))
+					a, err := octalStringToBytes(octal)
+					if err != nil {
+						log.Fatal(err)
+					}
+					fmt.Println("octal", octal)
+					fmt.Println(string(a))
+					fmt.Println(v)
+					slic = append(slic, octal)
+				}
+
 				var res []string
 				for i := 2; i <= 12; i += 2 {
-					a := strings.Join(result[i-2:i], " ")
+					a := strings.Join(slic[i-2:i], " ")
 					res = append(res, a)
 				}
 				if err := vivantQR.Output("./images/background.png", "./save.png", res); err != nil {
@@ -109,4 +125,36 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func bytesToOctalString(bytes []byte) string {
+	var octalString string
+
+	for _, b := range bytes {
+		octalString += fmt.Sprintf("%o", b)
+	}
+
+	return octalString
+}
+
+func octalStringToBytes(octalString string) ([]byte, error) {
+	var bytes []byte
+
+	for i := 0; i < len(octalString); i += 3 {
+		// 残りの文字が3文字未満の場合の対処
+		endIndex := i + 3
+		if endIndex > len(octalString) {
+			endIndex = len(octalString)
+		}
+
+		octalByte := octalString[i:endIndex]
+		var b int
+		_, err := fmt.Sscanf(octalByte, "%o", &b)
+		if err != nil {
+			return nil, err
+		}
+		bytes = append(bytes, byte(b))
+	}
+
+	return bytes, nil
 }

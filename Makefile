@@ -1,9 +1,9 @@
 build:
 	go build -o cli .
 read:
-	./cli --read true --file ./writed.txt 
+	make build &&  ./cli --read true
 write:
-	./cli --write true
+	make build &&  ./cli --write true
 fresh:
 	./cli --refresh true
 

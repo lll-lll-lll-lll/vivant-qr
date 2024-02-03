@@ -27,6 +27,9 @@ func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
 	if err := ocrC.c.SetImage(imgPath); err != nil {
 		return "", err
 	}
+	if err := ocrC.c.SetVariable(gosseract.TESSEDIT_CHAR_BLACKLIST, "Â¢â€'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
+		return "", err
+	}
 	txt, err := ocrC.c.Text()
 	if err != nil {
 		return "", err
