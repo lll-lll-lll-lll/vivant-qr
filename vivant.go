@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"strings"
 
 	"image/png"
 	"os"
@@ -23,7 +24,7 @@ type VivantQR struct {
 	cfg *Config
 }
 
-func (v *VivantQR) Encrpto() ([]string, error) {
+func (v *VivantQR) Encode() ([]string, error) {
 	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
 	HMAC.Write([]byte(vivant))
 	sig := HMAC.Sum(nil)
@@ -32,7 +33,7 @@ func (v *VivantQR) Encrpto() ([]string, error) {
 	return separate(octal, dummy, v.cfg.Order), nil
 }
 
-func (v *VivantQR) Decrypt(content []string) (string, error) {
+func (v *VivantQR) Decode(content []string) (string, error) {
 	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
 	HMAC.Write([]byte(vivant))
 	sig := HMAC.Sum(nil)
@@ -51,6 +52,33 @@ func (v *VivantQR) Decrypt(content []string) (string, error) {
 	}
 	return vivant, nil
 }
+
+func (v *VivantQR) FormatEncode(encrypted []string) []string {
+	var res []string
+	for i := 2; i <= 12; i += 2 {
+		a := strings.Join(encrypted[i-2:i], " ")
+		res = append(res, a)
+	}
+	return res
+}
+
+func (v *VivantQR) FormatDecode(content OCRTxt) []string {
+	splitedCnt := strings.Split(string(content), " ")
+	var formated []string
+	for _, v := range splitedCnt {
+		v = strings.ReplaceAll(v, "\n", " ")
+		spliteV := strings.Split(v, " ")
+		if len(spliteV) == 2 {
+			for i := 0; i < len(spliteV); i++ {
+				formated = append(formated, spliteV[i])
+			}
+			continue
+		}
+		formated = append(formated, v)
+	}
+	return formated
+}
+
 func (v *VivantQR) Output(backGroundPath, savePath string, texts []string) error {
 	file, err := os.Open(backGroundPath)
 	if err != nil {

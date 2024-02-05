@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/urfave/cli/v2"
 )
@@ -16,21 +15,12 @@ func main() {
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:  "refresh",
-				Value: false,
-				Usage: "",
-			}, &cli.BoolFlag{
 				Name:  "write",
 				Value: false,
 				Usage: "",
 			}, &cli.BoolFlag{
 				Name:  "read",
 				Value: false,
-				Usage: "",
-			},
-			&cli.StringFlag{
-				Name:  "file",
-				Value: "",
 				Usage: "",
 			},
 		},
@@ -47,52 +37,25 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				splitedCnt := strings.Split(string(content), " ")
-				var decoded []string
-				for _, v := range splitedCnt {
-					v = strings.ReplaceAll(v, "\n", " ")
-					spliteV := strings.Split(v, " ")
-					if len(spliteV) == 2 {
-						for i := 0; i < len(spliteV); i++ {
-							decoded = append(decoded, spliteV[i])
-						}
-						continue
-					}
-					decoded = append(decoded, v)
-				}
-				r, err := vivantQR.Decrypt(decoded)
+				formated := vivantQR.FormatDecode(content)
+				r, err := vivantQR.Decode(formated)
 				if err != nil {
 					log.Fatal(err)
 				}
-				fmt.Printf(string(r))
+				fmt.Printf(r)
 			}
 			if cCtx.Bool("write") {
-				cfg, err := NewCfg()
+				cfg, err := Refresh()
 				if err != nil {
 					log.Fatal(err)
 				}
 				vivantQR := &VivantQR{cfg: cfg}
-				result, err := vivantQR.Encrpto()
+				encrypted, err := vivantQR.Encode()
 				if err != nil {
 					log.Fatal(err)
 				}
-
-				var res []string
-				for i := 2; i <= 12; i += 2 {
-					a := strings.Join(result[i-2:i], " ")
-					res = append(res, a)
-				}
-				if err := vivantQR.Output("./images/background.png", "./save.png", res); err != nil {
-					log.Fatal(err)
-				}
-			}
-			if cCtx.Bool("refresh") {
-				f, err := os.Create(".env")
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer f.Close()
-				if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%s", genOrder(10), genSecret(32)))); err != nil {
+				formated := vivantQR.FormatEncode(encrypted)
+				if err := vivantQR.Output("./images/background.png", "./save.png", formated); err != nil {
 					log.Fatal(err)
 				}
 			}

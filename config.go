@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -12,6 +13,18 @@ import (
 type Config struct {
 	SecretKey string
 	Order     int
+}
+
+func Refresh() (*Config, error) {
+	f, err := os.Create(".env")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%s", genOrder(10), genSecret(32)))); err != nil {
+		return nil, err
+	}
+	return NewCfg()
 }
 
 func NewCfg() (*Config, error) {
