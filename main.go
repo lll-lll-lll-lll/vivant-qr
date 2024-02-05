@@ -54,21 +54,11 @@ func main() {
 					spliteV := strings.Split(v, " ")
 					if len(spliteV) == 2 {
 						for i := 0; i < len(spliteV); i++ {
-							s, err := octalStringToBytes(spliteV[i])
-							if err != nil {
-								log.Fatal(err)
-							}
-							fmt.Println("splite", spliteV[i])
-							fmt.Println("splite", string(s))
-							decoded = append(decoded, string(s))
+							decoded = append(decoded, spliteV[i])
 						}
 						continue
 					}
-					s, err := octalStringToBytes(v)
-					if err != nil {
-						log.Fatal(s, err)
-					}
-					decoded = append(decoded, string(s))
+					decoded = append(decoded, v)
 				}
 				r, err := vivantQR.Decrypt(decoded)
 				if err != nil {
@@ -87,22 +77,9 @@ func main() {
 					log.Fatal(err)
 				}
 
-				var slic []string
-				for _, v := range result {
-					octal := bytesToOctalString([]byte(v))
-					a, err := octalStringToBytes(octal)
-					if err != nil {
-						log.Fatal(err)
-					}
-					fmt.Println("octal", octal)
-					fmt.Println(string(a))
-					fmt.Println(v)
-					slic = append(slic, octal)
-				}
-
 				var res []string
 				for i := 2; i <= 12; i += 2 {
-					a := strings.Join(slic[i-2:i], " ")
+					a := strings.Join(result[i-2:i], " ")
 					res = append(res, a)
 				}
 				if err := vivantQR.Output("./images/background.png", "./save.png", res); err != nil {
@@ -131,7 +108,8 @@ func bytesToOctalString(bytes []byte) string {
 	var octalString string
 
 	for _, b := range bytes {
-		octalString += fmt.Sprintf("%o", b)
+		// 8進数で3桁になるようにフォーマット
+		octalString += fmt.Sprintf("%03o", b)
 	}
 
 	return octalString
@@ -149,7 +127,7 @@ func octalStringToBytes(octalString string) ([]byte, error) {
 
 		octalByte := octalString[i:endIndex]
 		var b int
-		_, err := fmt.Sscanf(octalByte, "%o", &b)
+		_, err := fmt.Sscanf(octalByte, "%03o", &b)
 		if err != nil {
 			return nil, err
 		}

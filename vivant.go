@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/hex"
+	"crypto/hmac"
+	"crypto/sha256"
+	"fmt"
 	"image"
 	"image/color"
 	"image/draw"
-	"strings"
 
 	"image/png"
 	"os"
@@ -24,45 +24,32 @@ type VivantQR struct {
 }
 
 func (v *VivantQR) Encrpto() ([]string, error) {
-	key, err := hex.DecodeString(v.cfg.SecretKey)
-	if err != nil {
-		return nil, err
-	}
-	iv, encrypted, err := Encrypt([]byte(vivant), key)
-	if err != nil {
-		return nil, err
-	}
-	encodedIV := base64.StdEncoding.EncodeToString(iv)
-	encodedEncrypted := base64.StdEncoding.EncodeToString(encrypted)
-	dummy := genDummy(16)
-	return separate(encodedIV, encodedEncrypted, dummy, v.cfg.Order), nil
+	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
+	HMAC.Write([]byte(vivant))
+	sig := HMAC.Sum(nil)
+	octal := bytesToOctalString(sig)
+	dummy := bytesToOctalString([]byte(genDummy(5)))
+	return separate(octal, dummy, v.cfg.Order), nil
 }
 
-func (v *VivantQR) Decrypt(content []string) ([]byte, error) {
-	key, err := hex.DecodeString(v.cfg.SecretKey)
-	if err != nil {
-		return nil, err
-	}
-	var correctNums = make([]string, 0, 11)
+func (v *VivantQR) Decrypt(content []string) (string, error) {
+	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
+	HMAC.Write([]byte(vivant))
+	sig := HMAC.Sum(nil)
+
+	var correctNums string
 	for _, o := range strconv.Itoa(v.cfg.Order) {
 		idx, _ := strconv.Atoi(string(o))
-		correctNums = append(correctNums, content[idx])
+		correctNums += content[idx]
 	}
-	iv := correctNums[len(correctNums)-1] + correctNums[len(correctNums)-2]
-	ivByte, err := base64.StdEncoding.DecodeString(iv)
+	e, err := octalStringToBytes(correctNums)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	notDummyEncrypted := strings.Join(correctNums[:8], "")
-	nde, err := base64.StdEncoding.DecodeString(notDummyEncrypted)
-	if err != nil {
-		return nil, err
+	if !hmac.Equal(e, sig) {
+		return "", fmt.Errorf("faild to decode")
 	}
-	decrypted, err := decrypt(nde, key, ivByte)
-	if err != nil {
-		return nil, err
-	}
-	return decrypted, nil
+	return vivant, nil
 }
 func (v *VivantQR) Output(backGroundPath, savePath string, texts []string) error {
 	file, err := os.Open(backGroundPath)
@@ -108,8 +95,8 @@ func drawTxt(img *image.RGBA, x, y int, text string) error {
 		return err
 	}
 	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size:    10,
-		DPI:     100,
+		Size:    20,
+		DPI:     120,
 		Hinting: font.Hinting(font.WeightThin),
 	})
 	if err != nil {
@@ -126,22 +113,19 @@ func drawTxt(img *image.RGBA, x, y int, text string) error {
 	return nil
 }
 
-func separate(iv string, encryptedTxt string, dummy string, order int) []string {
-	ivSepa := []string{iv[len(iv)/2:], iv[:len(iv)/2]}
+func separate(octal string, dummy string, order int) []string {
 	var orderStr string = strconv.Itoa(order)
-	num := len(encryptedTxt) / 8
+	num := len(octal) / 10
+	remainder := len(octal) % 10
 	var s = make([]string, 12)
-	for i, v := range orderStr[:len(orderStr)-2] {
+	for i, v := range orderStr {
 		idx, _ := strconv.Atoi(string(v))
 		startIndex := i * num
 		endIndex := (i + 1) * num
-		s[idx] = encryptedTxt[startIndex:endIndex]
+		if i == 9 {
+			endIndex += remainder
+		}
+		s[idx] = octal[startIndex:endIndex]
 	}
-	for i, v := range orderStr[len(orderStr)-2:] {
-		idx, _ := strconv.Atoi(string(v))
-		s[idx] = ivSepa[i]
-	}
-	s[10] = dummy[len(dummy)/2:]
-	s[11] = dummy[:len(dummy)/2]
 	return s
 }
