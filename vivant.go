@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math/rand"
 	"strings"
 
 	"image/png"
@@ -29,7 +30,7 @@ func (v *VivantQR) Encode() ([]string, error) {
 	HMAC.Write([]byte(vivant))
 	sig := HMAC.Sum(nil)
 	octal := bytesToOctalString(sig)
-	dummy := bytesToOctalString([]byte(genDummy(5)))
+	dummy := bytesToOctalString([]byte(string(rune(genData(5)))))
 	return separate(octal, dummy, v.cfg.Order), nil
 }
 
@@ -156,4 +157,14 @@ func separate(octal string, dummy string, order int) []string {
 		s[idx] = octal[startIndex:endIndex]
 	}
 	return s
+}
+
+func genData(num int64) int {
+	rand.New(rand.NewSource(num))
+	var res string
+	for _, v := range rand.Perm(int(num)) {
+		res += strconv.Itoa(v)
+	}
+	a, _ := strconv.Atoi(res)
+	return a
 }

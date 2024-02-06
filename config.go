@@ -21,7 +21,7 @@ func Refresh() (*Config, error) {
 		return nil, err
 	}
 	defer f.Close()
-	if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%s", genOrder(10), genSecret(32)))); err != nil {
+	if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%d", genData(10), genData(32)))); err != nil {
 		return nil, err
 	}
 	return NewCfg()

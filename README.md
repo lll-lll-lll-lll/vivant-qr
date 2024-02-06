@@ -8,3 +8,5 @@
 export LIBRARY_PATH="/opt/homebrew/lib"
 export CPATH="/opt/homebrew/include"
 ```
+
+opencv. load video -> send frame -> python. recognize numeric image -> grpc -> golang
