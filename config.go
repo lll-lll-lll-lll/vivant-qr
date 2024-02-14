@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	SecretKey string
-	Order     int
+	SecretKey   string
+	SecretValue string
+	Order       int
 }
 
 func Refresh() (*Config, error) {

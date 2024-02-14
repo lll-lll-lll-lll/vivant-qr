@@ -80,7 +80,8 @@ func (v *VivantQR) FormatDecode(content OCRTxt) []string {
 	return formated
 }
 
-func (v *VivantQR) Output(backGroundPath, savePath string, texts []string) error {
+func (v *VivantQR) Output(savePath string, texts []string) error {
+	backGroundPath := "./images/background.png"
 	file, err := os.Open(backGroundPath)
 	if err != nil {
 		return err

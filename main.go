@@ -56,7 +56,7 @@ func main() {
 					return err
 				}
 				formated := vivantQR.FormatEncode(encrypted)
-				if err := vivantQR.Output("./images/background.png", "./save.png", formated); err != nil {
+				if err := vivantQR.Output("./save.png", formated); err != nil {
 					return err
 				}
 			}
