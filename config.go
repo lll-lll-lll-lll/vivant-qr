@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -38,7 +37,7 @@ func NewCfg() (*Config, error) {
 	}
 	key := os.Getenv("SECRET_KEY")
 	if key == "" {
-		log.Fatal("secret key is nil")
+		return nil, err
 	}
 	o, err := strconv.Atoi(order)
 	if err != nil {
