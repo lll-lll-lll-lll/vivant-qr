@@ -1,4 +1,4 @@
-![](./save.png)
+![](./output.png)
 
 # 何これ
 
