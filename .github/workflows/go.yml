@@ -21,8 +21,8 @@ jobs:
           go-version: "1.21.6"
       - name: Set up environment variables
         run: |
-          export LIBRARY_PATH=/opt/homebrew/lib
-          export CPATH=/opt/homebrew/include
+          echo "export LIBRARY_PATH=/opt/homebrew/lib" >> $GITHUB_ENV
+          echo "export CPATH=/opt/homebrew/include" >> $GITHUB_ENV
 
       - name: Build
         run: go build -v ./...
