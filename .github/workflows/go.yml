@@ -12,9 +12,6 @@ permissions: write-all
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      LIBRARY_PATH: /opt/homebrew/lib
-      CPATH: /opt/homebrew/include
     steps:
       - uses: actions/checkout@v3
 
@@ -22,6 +19,10 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: "1.21.6"
+      - name: Set up environment variables
+        run: |
+          export LIBRARY_PATH=/opt/homebrew/lib
+          export CPATH=/opt/homebrew/include
 
       - name: Build
         run: go build -v ./...
