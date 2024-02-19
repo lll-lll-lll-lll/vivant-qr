@@ -12,6 +12,9 @@ permissions: write-all
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      LIBRARY_PATH: /opt/homebrew/lib
+      CPATH: /opt/homebrew/include
     steps:
       - uses: actions/checkout@v3
 
