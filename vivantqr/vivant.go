@@ -1,4 +1,4 @@
-package main
+package vivantqr
 
 import (
 	"crypto/hmac"
@@ -21,9 +21,13 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+const vivant = "https://www.netflix.com/jp/title/81726701"
+
 type VivantQR struct {
 	cfg *Config
 }
+
+func NewVivantQR(cfg *Config) *VivantQR { return &VivantQR{cfg: cfg} }
 
 func (v *VivantQR) Encode() ([]string, error) {
 	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
@@ -54,7 +58,7 @@ func (v *VivantQR) Decode(content []string) (string, error) {
 	return vivant, nil
 }
 
-func (v *VivantQR) FormatEncode(encrypted []string) []string {
+func (v *VivantQR) EncodeRawData(encrypted []string) []string {
 	var res []string
 	for i := 2; i <= 12; i += 2 {
 		a := strings.Join(encrypted[i-2:i], " ")
@@ -63,7 +67,7 @@ func (v *VivantQR) FormatEncode(encrypted []string) []string {
 	return res
 }
 
-func (v *VivantQR) FormatDecode(content OCRTxt) []string {
+func (v *VivantQR) DecodeRawData(content OCRTxt) []string {
 	splitedCnt := strings.Split(string(content), " ")
 	var formated []string
 	for _, v := range splitedCnt {

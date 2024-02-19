@@ -5,15 +5,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"vivant-qr/vivantqr"
 
 	"github.com/urfave/cli/v2"
 )
 
-const vivant = "https://www.netflix.com/jp/title/81726701"
-
 func main() {
 	app := &cli.App{
 		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "file",
+				Value:    "",
+				Usage:    "",
+				Required: true,
+			},
 			&cli.BoolFlag{
 				Name:  "write",
 				Value: false,
@@ -26,18 +31,19 @@ func main() {
 		},
 		Action: func(cCtx *cli.Context) error {
 			if cCtx.Bool("read") {
-				cfg, err := NewCfg()
+				path := cCtx.String("file")
+				cfg, err := vivantqr.NewCfg()
 				if err != nil {
 					return err
 				}
-				vivantQR := &VivantQR{cfg: cfg}
-				ocrClient := NewOCRClient()
-				defer ocrClient.c.Close()
-				content, err := ocrClient.Do(context.TODO(), "./save.png")
+				vivantQR := vivantqr.NewVivantQR(cfg)
+				ocrClient := vivantqr.NewOCRClient()
+				defer ocrClient.Close()
+				content, err := ocrClient.Do(context.TODO(), path)
 				if err != nil {
 					return err
 				}
-				formated := vivantQR.FormatDecode(content)
+				formated := vivantQR.DecodeRawData(content)
 				r, err := vivantQR.Decode(formated)
 				if err != nil {
 					return err
@@ -46,17 +52,18 @@ func main() {
 				return nil
 			}
 			if cCtx.Bool("write") {
-				cfg, err := Refresh()
+				path := cCtx.String("file")
+				cfg, err := vivantqr.Refresh()
 				if err != nil {
 					return err
 				}
-				vivantQR := &VivantQR{cfg: cfg}
+				vivantQR := vivantqr.NewVivantQR(cfg)
 				encrypted, err := vivantQR.Encode()
 				if err != nil {
 					return err
 				}
-				formated := vivantQR.FormatEncode(encrypted)
-				if err := vivantQR.Output("./save.png", formated); err != nil {
+				formated := vivantQR.EncodeRawData(encrypted)
+				if err := vivantQR.Output(path, formated); err != nil {
 					return err
 				}
 			}

@@ -1,4 +1,4 @@
-package main
+package vivantqr
 
 import (
 	"context"
@@ -18,6 +18,10 @@ type OCRClient struct {
 func NewOCRClient() *OCRClient {
 	client := gosseract.NewClient()
 	return &OCRClient{c: client}
+}
+
+func (ocrC *OCRClient) Close() error {
+	return ocrC.c.Close()
 }
 
 func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
