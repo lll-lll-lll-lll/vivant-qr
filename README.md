@@ -1,12 +1,12 @@
-# 仕組み
+# 何これ
+カードに写っている数列を特定のパターンで繋ぎ合わせて秘密鍵でデコードすると答えが取得できるcli
+# 作り始めたきっかけ
+vivantが面白くて、あるワンシーンで付箋に書いてある数列をカメラで映すとあるサーバの場所がわかる的なシーンがあり
+それに近いものを作りたくなったから
 
-- 画像処理で数列の紙を読み込む。
-- どの順番で数列を読み込むか指定
-- 順番で読みこみ復号処理
 
+ocrで画像の数列読み込み用のexport
 ```sh
 export LIBRARY_PATH="/opt/homebrew/lib"
 export CPATH="/opt/homebrew/include"
 ```
-
-opencv. load video -> send frame -> python. recognize numeric image -> grpc -> golang
