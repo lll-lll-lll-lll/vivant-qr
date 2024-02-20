@@ -16,17 +16,17 @@ func main() {
 			&cli.StringFlag{
 				Name:     "file",
 				Value:    "",
-				Usage:    "",
+				Usage:    "generated image save file path",
 				Required: true,
 			},
 			&cli.BoolFlag{
 				Name:  "write",
 				Value: false,
-				Usage: "",
+				Usage: "generate image file",
 			}, &cli.BoolFlag{
 				Name:  "read",
 				Value: false,
-				Usage: "",
+				Usage: "read generated image file",
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
