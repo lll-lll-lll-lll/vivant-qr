@@ -1,4 +1,4 @@
-![](./output.png)
+![](./sample.png)
 
 # 何これ
 
