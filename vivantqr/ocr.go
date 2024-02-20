@@ -3,21 +3,22 @@ package main
 import (
 	"context"
 
-	"github.com/otiai10/gosseract/v2"
+	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/option"
 )
 
 type OCRTxt string
 
-const defaultLanguage = "eng"
-
 type OCRClient struct {
-	c    *gosseract.Client
-	lang string
+	c *genai.Client
 }
 
-func NewOCRClient() *OCRClient {
-	client := gosseract.NewClient()
-	return &OCRClient{c: client}
+func NewOCRClient(ctx context.Context, apiKey string) (*OCRClient, error) {
+	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		return nil, err
+	}
+	return &OCRClient{c: client}, nil
 }
 
 func (ocrC *OCRClient) Close() error {
@@ -25,18 +26,5 @@ func (ocrC *OCRClient) Close() error {
 }
 
 func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
-	if ocrC.lang == "" {
-		ocrC.lang = defaultLanguage
-	}
-	if err := ocrC.c.SetImage(imgPath); err != nil {
-		return "", err
-	}
-	if err := ocrC.c.SetVariable(gosseract.TESSEDIT_CHAR_BLACKLIST, "Â¢â€'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
-		return "", err
-	}
-	txt, err := ocrC.c.Text()
-	if err != nil {
-		return "", err
-	}
-	return OCRTxt(txt), nil
+	return OCRTxt(""), nil
 }

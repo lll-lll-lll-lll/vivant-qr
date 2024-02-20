@@ -13,6 +13,12 @@ func main() {
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
+				Name:     "apikey",
+				Value:    "",
+				Usage:    "gemini api key",
+				Required: true,
+			},
+			&cli.StringFlag{
 				Name:     "file",
 				Value:    "",
 				Usage:    "generated image save file path",
@@ -30,13 +36,17 @@ func main() {
 		},
 		Action: func(cCtx *cli.Context) error {
 			if cCtx.Bool("read") {
+				apiKey := cCtx.String("apikey")
 				path := cCtx.String("file")
 				cfg, err := NewCfg()
 				if err != nil {
 					return err
 				}
 				vivantQR := NewVivantQR(cfg)
-				ocrClient := NewOCRClient()
+				ocrClient, err := NewOCRClient(context.Background(), apiKey)
+				if err != nil {
+					return err
+				}
 				defer ocrClient.Close()
 				content, err := ocrClient.Do(context.TODO(), path)
 				if err != nil {
