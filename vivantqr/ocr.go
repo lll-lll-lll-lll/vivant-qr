@@ -2,22 +2,29 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 
-	"github.com/otiai10/gosseract/v2"
+	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/option"
 )
+
+const prompt = "load numbers.Remove line breaks and replace them with spaces"
 
 type OCRTxt string
 
-const defaultLanguage = "eng"
-
 type OCRClient struct {
-	c    *gosseract.Client
-	lang string
+	c *genai.Client
+	m *genai.GenerativeModel
 }
 
-func NewOCRClient() *OCRClient {
-	client := gosseract.NewClient()
-	return &OCRClient{c: client}
+func NewOCRClient(ctx context.Context, apiKey, model string) (*OCRClient, error) {
+	c, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	if err != nil {
+		return nil, err
+	}
+	m := c.GenerativeModel(model)
+	return &OCRClient{c: c, m: m}, nil
 }
 
 func (ocrC *OCRClient) Close() error {
@@ -25,18 +32,21 @@ func (ocrC *OCRClient) Close() error {
 }
 
 func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
-	if ocrC.lang == "" {
-		ocrC.lang = defaultLanguage
-	}
-	if err := ocrC.c.SetImage(imgPath); err != nil {
-		return "", err
-	}
-	if err := ocrC.c.SetVariable(gosseract.TESSEDIT_CHAR_BLACKLIST, "Â¢â€'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"); err != nil {
-		return "", err
-	}
-	txt, err := ocrC.c.Text()
+	var out string
+	img, err := os.ReadFile(imgPath)
 	if err != nil {
 		return "", err
 	}
-	return OCRTxt(txt), nil
+	res, err := ocrC.m.GenerateContent(ctx, genai.Text(prompt), genai.ImageData("png", img))
+	if err != nil {
+		return "", err
+	}
+	for _, cand := range res.Candidates {
+		if cand.Content != nil {
+			for _, part := range cand.Content.Parts {
+				out += fmt.Sprint(part)
+			}
+		}
+	}
+	return OCRTxt(out), nil
 }
