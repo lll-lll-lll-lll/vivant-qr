@@ -71,6 +71,9 @@ func (v *VivantQR) FormatRawData(content OCRTxt) []string {
 	spliteV := strings.Split(string(content), " ")
 	for i, v := range spliteV {
 		v = strings.TrimSpace(v)
+		if v == "" {
+			continue
+		}
 		spliteV[i] = v
 	}
 	return spliteV

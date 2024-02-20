@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 )
 
 func Test(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		t.Setenv("APIKEY", "")
+		t.Setenv("APIKEY", " ")
 		c, err := NewOCRClient(context.Background(), os.Getenv("APIKEY"), "gemini-pro-vision")
 		if err != nil {
 			t.Fatal(err)
@@ -22,5 +23,6 @@ func Test(t *testing.T) {
 		if len(data) != 11 {
 			t.Fail()
 		}
+		fmt.Println(len(data))
 	})
 }
