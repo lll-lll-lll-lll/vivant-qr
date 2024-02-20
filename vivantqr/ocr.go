@@ -2,23 +2,29 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
 )
 
+const prompt = "load numbers.Remove line breaks and replace them with spaces"
+
 type OCRTxt string
 
 type OCRClient struct {
 	c *genai.Client
+	m *genai.GenerativeModel
 }
 
-func NewOCRClient(ctx context.Context, apiKey string) (*OCRClient, error) {
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+func NewOCRClient(ctx context.Context, apiKey, model string) (*OCRClient, error) {
+	c, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, err
 	}
-	return &OCRClient{c: client}, nil
+	m := c.GenerativeModel(model)
+	return &OCRClient{c: c, m: m}, nil
 }
 
 func (ocrC *OCRClient) Close() error {
@@ -26,5 +32,21 @@ func (ocrC *OCRClient) Close() error {
 }
 
 func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
-	return OCRTxt(""), nil
+	var out string
+	img, err := os.ReadFile(imgPath)
+	if err != nil {
+		return "", err
+	}
+	res, err := ocrC.m.GenerateContent(ctx, genai.Text(prompt), genai.ImageData("png", img))
+	if err != nil {
+		return "", err
+	}
+	for _, cand := range res.Candidates {
+		if cand.Content != nil {
+			for _, part := range cand.Content.Parts {
+				out += fmt.Sprint(part)
+			}
+		}
+	}
+	return OCRTxt(out), nil
 }

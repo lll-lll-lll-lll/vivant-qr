@@ -67,21 +67,13 @@ func (v *VivantQR) EncodeRawData(encrypted []string) []string {
 	return res
 }
 
-func (v *VivantQR) DecodeRawData(content OCRTxt) []string {
-	splitedCnt := strings.Split(string(content), " ")
-	var formated []string
-	for _, v := range splitedCnt {
-		v = strings.ReplaceAll(v, "\n", " ")
-		spliteV := strings.Split(v, " ")
-		if len(spliteV) == 2 {
-			for i := 0; i < len(spliteV); i++ {
-				formated = append(formated, spliteV[i])
-			}
-			continue
-		}
-		formated = append(formated, v)
+func (v *VivantQR) FormatRawData(content OCRTxt) []string {
+	spliteV := strings.Split(string(content), " ")
+	for i, v := range spliteV {
+		v = strings.TrimSpace(v)
+		spliteV[i] = v
 	}
-	return formated
+	return spliteV
 }
 
 func (v *VivantQR) Output(savePath string, texts []string) error {

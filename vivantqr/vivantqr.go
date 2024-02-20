@@ -43,16 +43,17 @@ func main() {
 					return err
 				}
 				vivantQR := NewVivantQR(cfg)
-				ocrClient, err := NewOCRClient(context.Background(), apiKey)
+				ctx := context.Background()
+				ocrClient, err := NewOCRClient(ctx, apiKey, "gemini-pro-vision")
 				if err != nil {
 					return err
 				}
 				defer ocrClient.Close()
-				content, err := ocrClient.Do(context.TODO(), path)
+				content, err := ocrClient.Do(ctx, path)
 				if err != nil {
 					return err
 				}
-				formated := vivantQR.DecodeRawData(content)
+				formated := vivantQR.FormatRawData(content)
 				r, err := vivantQR.Decode(formated)
 				if err != nil {
 					return err
