@@ -13,6 +13,12 @@ ocr の精度に依存している...
 vivant が面白くて、あるワンシーンで付箋に書いてある数列をカメラで映すとあるサーバの場所がわかる的なシーンがあり
 それに近いものを作りたくなったから
 
+# install
+
+```sh
+go install github.com/lll-lll-lll-lll/vivantqr/vivantqr@latest
+```
+
 # use
 
 ```sh

@@ -77,7 +77,7 @@ func (v *VivantQR) FormatRawData(content OCRTxt) []string {
 }
 
 func (v *VivantQR) Output(savePath string, texts []string) error {
-	backGroundPath := "./images/background.png"
+	backGroundPath := "./vivantqr/background.png"
 	file, err := os.Open(backGroundPath)
 	if err != nil {
 		return err
