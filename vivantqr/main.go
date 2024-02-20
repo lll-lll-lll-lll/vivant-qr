@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"vivant-qr/vivantqr"
 
 	"github.com/urfave/cli/v2"
 )
@@ -32,12 +31,12 @@ func main() {
 		Action: func(cCtx *cli.Context) error {
 			if cCtx.Bool("read") {
 				path := cCtx.String("file")
-				cfg, err := vivantqr.NewCfg()
+				cfg, err := NewCfg()
 				if err != nil {
 					return err
 				}
-				vivantQR := vivantqr.NewVivantQR(cfg)
-				ocrClient := vivantqr.NewOCRClient()
+				vivantQR := NewVivantQR(cfg)
+				ocrClient := NewOCRClient()
 				defer ocrClient.Close()
 				content, err := ocrClient.Do(context.TODO(), path)
 				if err != nil {
@@ -53,11 +52,11 @@ func main() {
 			}
 			if cCtx.Bool("write") {
 				path := cCtx.String("file")
-				cfg, err := vivantqr.Refresh()
+				cfg, err := Refresh()
 				if err != nil {
 					return err
 				}
-				vivantQR := vivantqr.NewVivantQR(cfg)
+				vivantQR := NewVivantQR(cfg)
 				encrypted, err := vivantQR.Encode()
 				if err != nil {
 					return err
@@ -66,6 +65,8 @@ func main() {
 				if err := vivantQR.Output(path, formated); err != nil {
 					return err
 				}
+				fmt.Println("order: ", cfg.Order)
+				fmt.Println("secret value: ", cfg.SecretValue)
 			}
 			return nil
 		},

@@ -15,3 +15,8 @@ ocr で画像の数列読み込み用の export. Windows は別で設定が必�
 export LIBRARY_PATH="/opt/homebrew/lib"
 export CPATH="/opt/homebrew/include"
 ```
+
+```sh
+vivant-qr --file ./output.png --read true
+vivant-qr --file ./output.png --write true
+```

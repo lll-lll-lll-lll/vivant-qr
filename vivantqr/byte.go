@@ -1,4 +1,4 @@
-package vivantqr
+package main
 
 import "fmt"
 
