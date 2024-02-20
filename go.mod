@@ -1,4 +1,4 @@
-module github.com/lll-lll-lll/vivantqr
+module github.com/lll-lll-lll-lll/vivantqr
 
 go 1.21.6
 
