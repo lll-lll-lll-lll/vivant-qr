@@ -1,4 +1,4 @@
-module vivant-qr
+module vivantqr
 
 go 1.21.6
 
