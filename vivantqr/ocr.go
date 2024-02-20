@@ -40,7 +40,3 @@ func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
 	}
 	return OCRTxt(txt), nil
 }
-
-func (ocrC *OCRClient) Format(txt string) []string {
-	return []string{}
-}
