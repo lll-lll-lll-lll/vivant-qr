@@ -21,8 +21,6 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-const vivant = "https://www.netflix.com/jp/title/81726701"
-
 type VivantQR struct {
 	cfg *Config
 }
@@ -31,7 +29,7 @@ func NewVivantQR(cfg *Config) *VivantQR { return &VivantQR{cfg: cfg} }
 
 func (v *VivantQR) Encode() ([]string, error) {
 	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
-	HMAC.Write([]byte(vivant))
+	HMAC.Write([]byte(v.cfg.SecretValue))
 	sig := HMAC.Sum(nil)
 	octal := bytesToOctalString(sig)
 	dummy := bytesToOctalString([]byte(string(rune(genData(5)))))
@@ -40,7 +38,7 @@ func (v *VivantQR) Encode() ([]string, error) {
 
 func (v *VivantQR) Decode(content []string) (string, error) {
 	HMAC := hmac.New(sha256.New, []byte(v.cfg.SecretKey))
-	HMAC.Write([]byte(vivant))
+	HMAC.Write([]byte(v.cfg.SecretValue))
 	sig := HMAC.Sum(nil)
 
 	var correctNums string
@@ -55,7 +53,7 @@ func (v *VivantQR) Decode(content []string) (string, error) {
 	if !hmac.Equal(e, sig) {
 		return "", fmt.Errorf("faild to decode")
 	}
-	return vivant, nil
+	return v.cfg.SecretValue, nil
 }
 
 func (v *VivantQR) EncodeRawData(encrypted []string) []string {
