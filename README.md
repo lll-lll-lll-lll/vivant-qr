@@ -16,7 +16,7 @@ vivant が面白くて、あるワンシーンで付箋に書いてある数列�
 # install
 
 ```sh
-go install github.com/lll-lll-lll-lll/vivantqr/vivantqr@latest
+go install github.com/lll-lll-lll-lll/vivantqr/vivantqr@v1.3.0
 ```
 
 # use
