@@ -48,5 +48,5 @@ func NewCfg() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Config{SecretKey: key, Order: o}, nil
+	return &Config{SecretKey: key, Order: o, SecretValue: val}, nil
 }
