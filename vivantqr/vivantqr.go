@@ -32,6 +32,10 @@ func main() {
 				Name:  "read",
 				Value: false,
 				Usage: "read generated image file",
+			}, &cli.StringFlag{
+				Name:  "secret",
+				Value: "",
+				Usage: "set secret value",
 			},
 		},
 		Action: func(cCtx *cli.Context) error {
@@ -63,7 +67,8 @@ func main() {
 			}
 			if cCtx.Bool("write") {
 				path := cCtx.String("file")
-				cfg, err := Refresh()
+				secret := cCtx.String("secret")
+				cfg, err := Refresh(secret)
 				if err != nil {
 					return err
 				}
@@ -77,7 +82,7 @@ func main() {
 					return err
 				}
 				fmt.Println("order: ", cfg.Order)
-				fmt.Println("secret value: ", cfg.SecretKey)
+				fmt.Println("secret key: ", cfg.SecretKey)
 			}
 			return nil
 		},

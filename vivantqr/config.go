@@ -15,13 +15,13 @@ type Config struct {
 	Order       int
 }
 
-func Refresh() (*Config, error) {
+func Refresh(secretVal string) (*Config, error) {
 	f, err := os.Create("env")
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%d", genData(10), genData(32)))); err != nil {
+	if _, err := f.Write([]byte(fmt.Sprintf("ORDER=%d\nSECRET_KEY=%d\nSECRET_VALUE=%s", genData(10), genData(32), secretVal))); err != nil {
 		return nil, err
 	}
 	return NewCfg()
@@ -38,6 +38,10 @@ func NewCfg() (*Config, error) {
 	}
 	key := os.Getenv("SECRET_KEY")
 	if key == "" {
+		return nil, err
+	}
+	val := os.Getenv("SECRET_VALUE")
+	if val == "" {
 		return nil, err
 	}
 	o, err := strconv.Atoi(order)
