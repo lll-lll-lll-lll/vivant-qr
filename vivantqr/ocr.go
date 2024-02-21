@@ -11,8 +11,6 @@ import (
 
 const prompt = "load numbers.Remove line breaks and replace them with spaces"
 
-type OCRTxt string
-
 type OCRClient struct {
 	c *genai.Client
 	m *genai.GenerativeModel
@@ -31,7 +29,7 @@ func (ocrC *OCRClient) Close() error {
 	return ocrC.c.Close()
 }
 
-func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
+func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (string, error) {
 	var out string
 	img, err := os.ReadFile(imgPath)
 	if err != nil {
@@ -48,5 +46,5 @@ func (ocrC *OCRClient) Do(ctx context.Context, imgPath string) (OCRTxt, error) {
 			}
 		}
 	}
-	return OCRTxt(out), nil
+	return out, nil
 }

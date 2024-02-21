@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func Refresh() (*Config, error) {
-	f, err := os.Create(".env")
+	f, err := os.Create("env")
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func Refresh() (*Config, error) {
 
 func NewCfg() (*Config, error) {
 	var err error = errors.New("failed to initialize config")
-	if e := godotenv.Load(); e != nil {
+	if e := godotenv.Load("env"); e != nil {
 		return nil, err
 	}
 	order := os.Getenv("ORDER")
