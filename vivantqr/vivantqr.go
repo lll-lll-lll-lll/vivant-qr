@@ -77,7 +77,7 @@ func main() {
 					return err
 				}
 				fmt.Println("order: ", cfg.Order)
-				fmt.Println("secret value: ", cfg.SecretValue)
+				fmt.Println("secret value: ", cfg.SecretKey)
 			}
 			return nil
 		},
